@@ -19,10 +19,11 @@ const INDEX_FINGER_TIP = 8;
 // Matter.js 
 const {Engine, Body, Bodies, Composite, Composites, Constraint, Vector} = Matter;
 let engine;
-let leftBridge, rightBridge; // 新增兩條繩子
+let leftBridge, rightBridge; // 左右手各控制一條繩子
 let num = 10; let radius = 10; let length = 25;
 let circles = [];
-let score = 0; // 分數變數
+let leftScore = 0; // 左手分數
+let rightScore = 0; // 右手分數
 
 let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef562f", "#fc8405", "#f9d531"];
 
@@ -65,7 +66,12 @@ function draw() {
     if (circles[i].done) {
       circles[i].removeCircle();
       circles.splice(i, 1);
-      score++; // 每移除一個圓形，分數加1
+      // 判斷圓形被哪一條繩子移除，更新對應的分數
+      if (circles[i].removedBy === "left") {
+        leftScore++;
+      } else if (circles[i].removedBy === "right") {
+        rightScore++;
+      }
     }
   }
   
@@ -99,10 +105,13 @@ function draw() {
     }
   }
   
-  // 顯示分數
+  // 顯示左手分數
   fill(0);
   textSize(20);
-  text(`分數: ${score}`, 10, 30);
+  text(`左手分數: ${leftScore}`, 10, 30);
+  
+  // 顯示右手分數
+  text(`右手分數: ${rightScore}`, width - 150, 30);
   
   // 顯示畫面中間的文字
   textSize(40);
@@ -112,4 +121,31 @@ function draw() {
 
 function gotHands(results) {
   hands = results;  // save the output to the hands variable
+}
+
+// Circle 類別需要新增屬性 `removedBy`，用來記錄圓形被哪一條繩子移除
+class Circle {
+  constructor() {
+    this.body = Bodies.circle(random(width), random(height), radius);
+    Composite.add(engine.world, this.body);
+    this.done = false;
+    this.removedBy = null; // 初始化為 null
+  }
+  
+  checkDone() {
+    // 判斷圓形是否被移除，並記錄移除者
+    if (this.body.position.y > height) {
+      this.done = true;
+      this.removedBy = this.body.position.x < width / 2 ? "left" : "right";
+    }
+  }
+  
+  display() {
+    fill(colorPalette[floor(random(colorPalette.length))]);
+    circle(this.body.position.x, this.body.position.y, radius * 2);
+  }
+  
+  removeCircle() {
+    Composite.remove(engine.world, this.body);
+  }
 }
