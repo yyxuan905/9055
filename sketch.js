@@ -35,7 +35,11 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
   // Create the webcam video and hide it
-  video = createCapture(VIDEO, {flipped: true});
+  video = createCapture(VIDEO, {flipped: true}, (stream) => {
+    if (!stream) {
+      console.error("No webcam found on this device.");
+    }
+  });
   video.size(640, 480);
   video.hide();
   // start detecting hands from the webcam video
@@ -53,7 +57,15 @@ function draw() {
   stroke(0);
   
   // Draw the webcam video
-  image(video, 0, 0, width, height);
+  if (video.loadedmetadata) {
+    image(video, 0, 0, width, height);
+  } else {
+    fill(0);
+    textSize(20);
+    textAlign(CENTER, CENTER);
+    text("Webcam not found", width / 2, height / 2);
+    return;
+  }
   
   if (random() < 0.05) { // 降低球生成的頻率，避免性能問題
     circles.push(new Circle());
