@@ -29,7 +29,7 @@ let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef5
 
 function preload() {
   // Load the handPose model
-  handPose = ml5.handPose({maxHands: 1, flipped: true});
+  handPose = ml5.handPose({maxHands: 2, flipped: true}); // 修正 maxHands 為 2，支援雙手
 }
 
 function setup() {
@@ -55,7 +55,7 @@ function draw() {
   // Draw the webcam video
   image(video, 0, 0, width, height);
   
-  if (random() < 0.1) {
+  if (random() < 0.05) { // 降低球生成的頻率，避免性能問題
     circles.push(new Circle());
   }
   
@@ -66,34 +66,31 @@ function draw() {
     if (circles[i].done) {
       circles[i].removeCircle();
       circles.splice(i, 1);
-      // 判斷圓形被哪一條繩子移除，更新對應的分數
-      if (circles[i].removedBy === "left") {
-        leftScore++;
-      } else if (circles[i].removedBy === "right") {
-        rightScore++;
-      }
     }
   }
   
   if (hands.length > 0) {
-    let thumbLeft = hands[0].keypoints[THUMB_TIP];
-    let indexLeft = hands[0].keypoints[INDEX_FINGER_TIP];
-    let thumbRight = hands.length > 1 ? hands[1].keypoints[THUMB_TIP] : null;
-    let indexRight = hands.length > 1 ? hands[1].keypoints[INDEX_FINGER_TIP] : null;
+    let thumbLeft = hands[0]?.keypoints[THUMB_TIP];
+    let indexLeft = hands[0]?.keypoints[INDEX_FINGER_TIP];
+    let thumbRight = hands.length > 1 ? hands[1]?.keypoints[THUMB_TIP] : null;
+    let indexRight = hands.length > 1 ? hands[1]?.keypoints[INDEX_FINGER_TIP] : null;
     
-    fill(0, 255, 0);
-    noStroke();
-    circle(thumbLeft.x, thumbLeft.y, 10);
-    circle(indexLeft.x, indexLeft.y, 10);
-    
-    leftBridge.bodies[0].position.x = thumbLeft.x;
-    leftBridge.bodies[0].position.y = thumbLeft.y;
-    leftBridge.bodies[leftBridge.bodies.length - 1].position.x = indexLeft.x;
-    leftBridge.bodies[leftBridge.bodies.length - 1].position.y = indexLeft.y;
-    leftBridge.display();
+    if (thumbLeft && indexLeft) {
+      fill(0, 255, 0);
+      noStroke();
+      circle(thumbLeft.x, thumbLeft.y, 10);
+      circle(indexLeft.x, indexLeft.y, 10);
+      
+      leftBridge.bodies[0].position.x = thumbLeft.x;
+      leftBridge.bodies[0].position.y = thumbLeft.y;
+      leftBridge.bodies[leftBridge.bodies.length - 1].position.x = indexLeft.x;
+      leftBridge.bodies[leftBridge.bodies.length - 1].position.y = indexLeft.y;
+      leftBridge.display();
+    }
     
     if (thumbRight && indexRight) {
       fill(255, 0, 0);
+      noStroke();
       circle(thumbRight.x, thumbRight.y, 10);
       circle(indexRight.x, indexRight.y, 10);
       
@@ -102,6 +99,29 @@ function draw() {
       rightBridge.bodies[rightBridge.bodies.length - 1].position.x = indexRight.x;
       rightBridge.bodies[rightBridge.bodies.length - 1].position.y = indexRight.y;
       rightBridge.display();
+    }
+  }
+  
+  // 檢查球是否被繩子接住
+  for (let circle of circles) {
+    let circlePos = circle.body.position;
+    let leftBridgeStart = leftBridge.bodies[0].position;
+    let leftBridgeEnd = leftBridge.bodies[leftBridge.bodies.length - 1].position;
+    let rightBridgeStart = rightBridge.bodies[0].position;
+    let rightBridgeEnd = rightBridge.bodies[rightBridge.bodies.length - 1].position;
+    
+    // 左手繩子接住球
+    if (circlePos.x > leftBridgeStart.x && circlePos.x < leftBridgeEnd.x &&
+        circlePos.y > leftBridgeStart.y && circlePos.y < leftBridgeEnd.y) {
+      leftScore++;
+      circle.done = true;
+    }
+    
+    // 右手繩子接住球
+    if (circlePos.x > rightBridgeStart.x && circlePos.x < rightBridgeEnd.x &&
+        circlePos.y > rightBridgeStart.y && circlePos.y < rightBridgeEnd.y) {
+      rightScore++;
+      circle.done = true;
     }
   }
   
@@ -133,10 +153,9 @@ class Circle {
   }
   
   checkDone() {
-    // 判斷圓形是否被移除，並記錄移除者
+    // 判斷圓形是否超出畫面
     if (this.body.position.y > height) {
       this.done = true;
-      this.removedBy = this.body.position.x < width / 2 ? "left" : "right";
     }
   }
   
