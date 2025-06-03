@@ -67,7 +67,7 @@ function draw() {
     return;
   }
   
-  if (random() < 0.05) { // 降低球生成的頻率，避免性能問題
+  if (random() < 0.03) { // 降低球生成的頻率，避免性能問題
     circles.push(new Circle());
   }
   
@@ -93,10 +93,11 @@ function draw() {
       circle(thumbLeft.x, thumbLeft.y, 10);
       circle(indexLeft.x, indexLeft.y, 10);
       
-      leftBridge.bodies[0].position.x = thumbLeft.x;
-      leftBridge.bodies[0].position.y = thumbLeft.y;
-      leftBridge.bodies[leftBridge.bodies.length - 1].position.x = indexLeft.x;
-      leftBridge.bodies[leftBridge.bodies.length - 1].position.y = indexLeft.y;
+      // 平滑移動左手繩子
+      leftBridge.bodies[0].position.x = lerp(leftBridge.bodies[0].position.x, thumbLeft.x, 0.5);
+      leftBridge.bodies[0].position.y = lerp(leftBridge.bodies[0].position.y, thumbLeft.y, 0.5);
+      leftBridge.bodies[leftBridge.bodies.length - 1].position.x = lerp(leftBridge.bodies[leftBridge.bodies.length - 1].position.x, indexLeft.x, 0.5);
+      leftBridge.bodies[leftBridge.bodies.length - 1].position.y = lerp(leftBridge.bodies[leftBridge.bodies.length - 1].position.y, indexLeft.y, 0.5);
       leftBridge.display();
     }
     
@@ -106,10 +107,11 @@ function draw() {
       circle(thumbRight.x, thumbRight.y, 10);
       circle(indexRight.x, indexRight.y, 10);
       
-      rightBridge.bodies[0].position.x = thumbRight.x;
-      rightBridge.bodies[0].position.y = thumbRight.y;
-      rightBridge.bodies[rightBridge.bodies.length - 1].position.x = indexRight.x;
-      rightBridge.bodies[rightBridge.bodies.length - 1].position.y = indexRight.y;
+      // 平滑移動右手繩子
+      rightBridge.bodies[0].position.x = lerp(rightBridge.bodies[0].position.x, thumbRight.x, 0.5);
+      rightBridge.bodies[0].position.y = lerp(rightBridge.bodies[0].position.y, thumbRight.y, 0.5);
+      rightBridge.bodies[rightBridge.bodies.length - 1].position.x = lerp(rightBridge.bodies[rightBridge.bodies.length - 1].position.x, indexRight.x, 0.5);
+      rightBridge.bodies[rightBridge.bodies.length - 1].position.y = lerp(rightBridge.bodies[rightBridge.bodies.length - 1].position.y, indexRight.y, 0.5);
       rightBridge.display();
     }
   }
