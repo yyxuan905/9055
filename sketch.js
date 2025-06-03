@@ -67,8 +67,8 @@ function draw() {
     return;
   }
   
-  if (random() < 0.03) { // 降低球生成的頻率，避免性能問題
-    circles.push(new Circle());
+  if (random() < 0.03) { // 降低愛心生成的頻率，避免性能問題
+    circles.push(new Heart());
   }
   
   for (let i = circles.length - 1; i >= 0; i--) {
@@ -76,7 +76,7 @@ function draw() {
     circles[i].display();
     
     if (circles[i].done) {
-      circles[i].removeCircle();
+      circles[i].removeHeart();
       circles.splice(i, 1);
     }
   }
@@ -98,7 +98,7 @@ function draw() {
       leftBridge.bodies[0].position.y = lerp(leftBridge.bodies[0].position.y, thumbLeft.y, 0.5);
       leftBridge.bodies[leftBridge.bodies.length - 1].position.x = lerp(leftBridge.bodies[leftBridge.bodies.length - 1].position.x, indexLeft.x, 0.5);
       leftBridge.bodies[leftBridge.bodies.length - 1].position.y = lerp(leftBridge.bodies[leftBridge.bodies.length - 1].position.y, indexLeft.y, 0.5);
-      leftBridge.display();
+      leftBridge.display("red"); // 繩子顏色改為紅色
     }
     
     if (thumbRight && indexRight) {
@@ -112,33 +112,33 @@ function draw() {
       rightBridge.bodies[0].position.y = lerp(rightBridge.bodies[0].position.y, thumbRight.y, 0.5);
       rightBridge.bodies[rightBridge.bodies.length - 1].position.x = lerp(rightBridge.bodies[rightBridge.bodies.length - 1].position.x, indexRight.x, 0.5);
       rightBridge.bodies[rightBridge.bodies.length - 1].position.y = lerp(rightBridge.bodies[rightBridge.bodies.length - 1].position.y, indexRight.y, 0.5);
-      rightBridge.display();
+      rightBridge.display("red"); // 繩子顏色改為紅色
     }
   }
   
-  // 檢查球是否被繩子接住
-  for (let circle of circles) {
-    let circlePos = circle.body.position;
+  // 檢查愛心是否被繩子接住
+  for (let heart of circles) {
+    let heartPos = heart.body.position;
     let leftBridgeStart = leftBridge.bodies[0].position;
     let leftBridgeEnd = leftBridge.bodies[leftBridge.bodies.length - 1].position;
     let rightBridgeStart = rightBridge.bodies[0].position;
     let rightBridgeEnd = rightBridge.bodies[rightBridge.bodies.length - 1].position;
     
-    // 左手繩子接住球
-    if (circlePos.x > leftBridgeStart.x && circlePos.x < leftBridgeEnd.x &&
-        circlePos.y > leftBridgeStart.y && circlePos.y < leftBridgeEnd.y) {
-      if (!circle.done) { // 確保只加一次分
+    // 左手繩子接住愛心
+    if (heartPos.x > leftBridgeStart.x && heartPos.x < leftBridgeEnd.x &&
+        heartPos.y > leftBridgeStart.y && heartPos.y < leftBridgeEnd.y) {
+      if (!heart.done) { // 確保只加一次分
         leftScore++;
-        circle.done = true;
+        heart.done = true;
       }
     }
     
-    // 右手繩子接住球
-    if (circlePos.x > rightBridgeStart.x && circlePos.x < rightBridgeEnd.x &&
-        circlePos.y > rightBridgeStart.y && circlePos.y < rightBridgeEnd.y) {
-      if (!circle.done) { // 確保只加一次分
+    // 右手繩子接住愛心
+    if (heartPos.x > rightBridgeStart.x && heartPos.x < rightBridgeEnd.x &&
+        heartPos.y > rightBridgeStart.y && heartPos.y < rightBridgeEnd.y) {
+      if (!heart.done) { // 確保只加一次分
         rightScore++;
-        circle.done = true;
+        heart.done = true;
       }
     }
   }
@@ -161,28 +161,35 @@ function gotHands(results) {
   hands = results;  // save the output to the hands variable
 }
 
-// Circle 類別需要新增屬性 `removedBy`，用來記錄圓形被哪一條繩子移除
-class Circle {
+// Heart 類別，繪製愛心形狀
+class Heart {
   constructor() {
     this.body = Bodies.circle(random(width), random(height), radius);
     Composite.add(engine.world, this.body);
     this.done = false;
-    this.removedBy = null; // 初始化為 null
   }
   
   checkDone() {
-    // 判斷圓形是否超出畫面
+    // 判斷愛心是否超出畫面
     if (this.body.position.y > height) {
       this.done = true;
     }
   }
   
   display() {
-    fill(colorPalette[floor(random(colorPalette.length))]);
-    circle(this.body.position.x, this.body.position.y, radius * 2);
+    fill("#ff69b4"); // 愛心顏色
+    noStroke();
+    push();
+    translate(this.body.position.x, this.body.position.y);
+    beginShape();
+    vertex(0, -radius);
+    bezierVertex(-radius, -radius * 1.5, -radius * 1.5, 0, 0, radius);
+    bezierVertex(radius * 1.5, 0, radius, -radius * 1.5, 0, -radius);
+    endShape(CLOSE);
+    pop();
   }
   
-  removeCircle() {
+  removeHeart() {
     Composite.remove(engine.world, this.body);
   }
 }
