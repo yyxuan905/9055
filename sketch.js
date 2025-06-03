@@ -19,16 +19,17 @@ const INDEX_FINGER_TIP = 8;
 // Matter.js 
 const {Engine, Body, Bodies, Composite, Composites, Constraint, Vector} = Matter;
 let engine;
-let bridge; let num = 10; let radius = 10; let length = 25;
+let leftBridge, rightBridge; // 新增兩條繩子
+let num = 10; let radius = 10; let length = 25;
 let circles = [];
+let score = 0; // 分數變數
 
-let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef562f", "#fc8405", "#f9d531"]; 
+let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef562f", "#fc8405", "#f9d531"];
 
 function preload() {
   // Load the handPose model
   handPose = ml5.handPose({maxHands: 1, flipped: true});
 }
-
 
 function setup() {
   createCanvas(640, 480);
@@ -39,9 +40,9 @@ function setup() {
   // start detecting hands from the webcam video
   handPose.detectStart(video, gotHands);
   
-  
   engine = Engine.create();
-  bridge = new Bridge(num, radius, length);
+  leftBridge = new Bridge(num, radius, length); // 左手控制的繩子
+  rightBridge = new Bridge(num, radius, length); // 右手控制的繩子
 }
 
 function draw() {
@@ -57,37 +58,58 @@ function draw() {
     circles.push(new Circle());
   }
   
-  for (let i=circles.length-1; i>=0; i--) {
+  for (let i = circles.length - 1; i >= 0; i--) {
     circles[i].checkDone();
     circles[i].display();
     
     if (circles[i].done) {
       circles[i].removeCircle();
       circles.splice(i, 1);
+      score++; // 每移除一個圓形，分數加1
     }
-    
   }
   
   if (hands.length > 0) {
-    let thumb = hands[0].keypoints[THUMB_TIP];
-    let index = hands[0].keypoints[INDEX_FINGER_TIP];
+    let thumbLeft = hands[0].keypoints[THUMB_TIP];
+    let indexLeft = hands[0].keypoints[INDEX_FINGER_TIP];
+    let thumbRight = hands.length > 1 ? hands[1].keypoints[THUMB_TIP] : null;
+    let indexRight = hands.length > 1 ? hands[1].keypoints[INDEX_FINGER_TIP] : null;
+    
     fill(0, 255, 0);
     noStroke();
-    circle(thumb.x, thumb.y, 10);
-    circle(index.x, index.y, 10);
+    circle(thumbLeft.x, thumbLeft.y, 10);
+    circle(indexLeft.x, indexLeft.y, 10);
     
-    bridge.bodies[0].position.x = thumb.x;
-    bridge.bodies[0].position.y = thumb.y;
-    bridge.bodies[bridge.bodies.length-1].position.x = index.x;
-    bridge.bodies[bridge.bodies.length-1].position.y = index.y;
-    bridge.display();
+    leftBridge.bodies[0].position.x = thumbLeft.x;
+    leftBridge.bodies[0].position.y = thumbLeft.y;
+    leftBridge.bodies[leftBridge.bodies.length - 1].position.x = indexLeft.x;
+    leftBridge.bodies[leftBridge.bodies.length - 1].position.y = indexLeft.y;
+    leftBridge.display();
+    
+    if (thumbRight && indexRight) {
+      fill(255, 0, 0);
+      circle(thumbRight.x, thumbRight.y, 10);
+      circle(indexRight.x, indexRight.y, 10);
+      
+      rightBridge.bodies[0].position.x = thumbRight.x;
+      rightBridge.bodies[0].position.y = thumbRight.y;
+      rightBridge.bodies[rightBridge.bodies.length - 1].position.x = indexRight.x;
+      rightBridge.bodies[rightBridge.bodies.length - 1].position.y = indexRight.y;
+      rightBridge.display();
+    }
   }
   
+  // 顯示分數
+  fill(0);
+  textSize(20);
+  text(`分數: ${score}`, 10, 30);
   
+  // 顯示畫面中間的文字
+  textSize(40);
+  textAlign(CENTER, CENTER);
+  text("教育科技系", width / 2, height / 2);
 }
 
-// Callback function for when handPose outputs data
 function gotHands(results) {
-  // save the output to the hands variable
-  hands = results;
+  hands = results;  // save the output to the hands variable
 }
