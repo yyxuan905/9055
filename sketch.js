@@ -125,15 +125,19 @@ function draw() {
     // 左手繩子接住球
     if (circlePos.x > leftBridgeStart.x && circlePos.x < leftBridgeEnd.x &&
         circlePos.y > leftBridgeStart.y && circlePos.y < leftBridgeEnd.y) {
-      leftScore++;
-      circle.done = true;
+      if (!circle.done) { // 確保只加一次分
+        leftScore++;
+        circle.done = true;
+      }
     }
     
     // 右手繩子接住球
     if (circlePos.x > rightBridgeStart.x && circlePos.x < rightBridgeEnd.x &&
         circlePos.y > rightBridgeStart.y && circlePos.y < rightBridgeEnd.y) {
-      rightScore++;
-      circle.done = true;
+      if (!circle.done) { // 確保只加一次分
+        rightScore++;
+        circle.done = true;
+      }
     }
   }
   
