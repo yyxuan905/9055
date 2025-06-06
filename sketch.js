@@ -147,19 +147,19 @@ function draw() {
   // 顯示玩家分數
   text(`分數: ${score}`, width - 100, 30);
 
-  // 顯示玩家愛心
+  // 顯示玩家愛心（右上角）
   fill(255, 0, 0);
   for (let i = 0; i < lives; i++) {
-    heart(20 + i * 30, 60, 20);
+    heart(width - 30 - i * 40, 30, 30); // 大愛心顯示在右上角
   }
 }
 
 // Ball 類別，繪製球形狀
 class Ball {
   constructor() {
-    this.radius = random(20, 40);
+    this.radius = random(30, 50); // 放大球的大小
     this.body = Bodies.circle(random(width), random(height), this.radius, {
-      frictionAir: 0.05, // 增加空氣阻力，讓球掉落速度變慢
+      frictionAir: 0.1, // 增加空氣阻力，讓球掉落速度更慢
     });
     Composite.add(engine.world, this.body);
     let knowledge = random(knowledgePool); // 隨機選擇知識
@@ -181,7 +181,7 @@ class Ball {
     translate(this.body.position.x, this.body.position.y);
     circle(0, 0, this.radius * 2);
     fill(0);
-    textSize(16);
+    textSize(20); // 放大球上的文字
     textAlign(CENTER, CENTER);
     text(this.text, 0, 0); // 在球上顯示知識
     pop();
