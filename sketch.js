@@ -27,12 +27,12 @@ let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef5
 
 // 教育科技知識庫
 const knowledgePool = [
-  { text: "教育科技能提升學習效率", correct: true },
-  { text: "教育科技只適合年輕人", correct: false },
-  { text: "線上學習可以促進全球教育公平", correct: true },
-  { text: "教育科技取代教師是必然的", correct: false },
-  { text: "虛擬實境能幫助學生更好地理解抽象概念", correct: true },
-  { text: "教育科技不需要任何技術支持", correct: false },
+  { text: "AI可以幫助人類", correct: true },
+  { text: "教育科技的出路很廣泛", correct: true },
+  { text: "教科的老師人很好", correct: true },
+  { text: "小狗", correct: false },
+  { text: "貓咪", correct: false },
+  { text: "食物", correct: false },
 ];
 
 function preload() {
@@ -120,7 +120,9 @@ function draw() {
 class Ball {
   constructor() {
     this.radius = random(20, 40);
-    this.body = Bodies.circle(random(width), random(height), this.radius);
+    this.body = Bodies.circle(random(width), random(height), this.radius, {
+      frictionAir: 0.02, // 增加空氣阻力，讓球掉落速度變慢
+    });
     Composite.add(engine.world, this.body);
     let knowledge = random(knowledgePool); // 隨機選擇知識
     this.text = knowledge.text;
