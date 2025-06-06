@@ -13,8 +13,7 @@ let handPose;
 let video;
 let hands = [];
 
-const THUMB_TIP = 4;
-const INDEX_FINGER_TIP = 8;
+const PALM_BASE = 0; // 手掌基底的索引
 
 // Matter.js 
 const {Engine, Body, Bodies, Composite, Composites, Constraint, Vector} = Matter;
@@ -114,18 +113,18 @@ function draw() {
     }
   }
   
-  // 檢查手指是否觸碰到球
+  // 檢查手掌是否觸碰到球
   if (hands.length > 0) {
-    let indexFinger = hands[0]?.keypoints[INDEX_FINGER_TIP];
+    let palmBase = hands[0]?.keypoints[PALM_BASE];
     
-    if (indexFinger) {
-      fill(0, 255, 0);
+    if (palmBase) {
+      fill(0, 255, 0, 100);
       noStroke();
-      circle(indexFinger.x, indexFinger.y, 10);
+      ellipse(palmBase.x, palmBase.y, 50, 50); // 用手掌基底繪製一個較大的接觸面積
       
       for (let ball of balls) {
         let ballPos = ball.body.position;
-        let distance = dist(indexFinger.x, indexFinger.y, ballPos.x, ballPos.y);
+        let distance = dist(palmBase.x, palmBase.y, ballPos.x, ballPos.y);
         
         if (distance < ball.radius && !ball.done) {
           if (ball.correct) {
