@@ -20,13 +20,20 @@ const INDEX_FINGER_TIP = 8;
 const {Engine, Body, Bodies, Composite, Composites, Constraint, Vector} = Matter;
 let engine;
 let balls = [];
-let targetNumber; // 正確答案的目標數字
+let targetKnowledge; // 正確答案的目標知識
 let score = 0; // 玩家分數
 
 let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef562f", "#fc8405", "#f9d531"];
 
-let timeLimit = 60; // 遊戲時間限制（秒）
-let startTime;
+// 教育科技知識庫
+const knowledgePool = [
+  { text: "教育科技能提升學習效率", correct: true },
+  { text: "教育科技只適合年輕人", correct: false },
+  { text: "線上學習可以促進全球教育公平", correct: true },
+  { text: "教育科技取代教師是必然的", correct: false },
+  { text: "虛擬實境能幫助學生更好地理解抽象概念", correct: true },
+  { text: "教育科技不需要任何技術支持", correct: false },
+];
 
 function preload() {
   // Load the handPose model
@@ -45,33 +52,13 @@ function setup() {
   handPose.detectStart(video, gotHands);
   
   engine = Engine.create();
-  targetNumber = floor(random(1, 10)); // 隨機生成目標數字
-  startTime = millis(); // 設定遊戲開始時間
+  targetKnowledge = random(knowledgePool.filter(k => k.correct)).text; // 隨機選擇正確知識作為目標
 }
 
 function draw() {
   background(220);
   Engine.update(engine);
-
-  let elapsedTime = floor((millis() - startTime) / 1000);
-  let remainingTime = timeLimit - elapsedTime;
-
-  if (remainingTime <= 0) {
-    // 遊戲結束
-    background(0);
-    fill(255);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text(`遊戲結束！分數: ${score}`, width / 2, height / 2);
-    noLoop(); // 停止 draw 循環
-    return;
-  }
-
-  // 顯示剩餘時間
-  fill(0);
-  textSize(20);
-  text(`剩餘時間: ${remainingTime} 秒`, width / 2, 30);
-
+  
   // Draw the webcam video
   if (video.loadedmetadata) {
     image(video, 0, 0, width, height);
@@ -112,7 +99,7 @@ function draw() {
         let ballPos = ball.body.position;
         let distance = dist(indexFinger.x, indexFinger.y, ballPos.x, ballPos.y);
         
-        if (distance < ball.radius && ball.number === targetNumber && !ball.done) {
+        if (distance < ball.radius && ball.text === targetKnowledge && !ball.done) {
           score++;
           ball.done = true;
         }
@@ -120,10 +107,10 @@ function draw() {
     }
   }
   
-  // 顯示目標數字
+  // 顯示目標知識
   fill(0);
   textSize(20);
-  text(`目標數字: ${targetNumber}`, 10, 30);
+  text(`目標知識: ${targetKnowledge}`, 10, 30);
   
   // 顯示玩家分數
   text(`分數: ${score}`, width - 100, 30);
@@ -135,7 +122,9 @@ class Ball {
     this.radius = random(20, 40);
     this.body = Bodies.circle(random(width), random(height), this.radius);
     Composite.add(engine.world, this.body);
-    this.number = floor(random(1, 10)); // 隨機生成球上的數字
+    let knowledge = random(knowledgePool); // 隨機選擇知識
+    this.text = knowledge.text;
+    this.correct = knowledge.correct;
     this.done = false;
   }
   
@@ -154,7 +143,7 @@ class Ball {
     fill(0);
     textSize(16);
     textAlign(CENTER, CENTER);
-    text(this.number, 0, 0); // 在球上顯示數字
+    text(this.text, 0, 0); // 在球上顯示知識
     pop();
   }
   
